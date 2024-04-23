@@ -7,9 +7,9 @@ import { CountResponse, Post } from './postModel';
 import { postRepository } from './postRepository';
 
 export const postService = {
-  getAll: async (): Promise<ServiceResponse<Post[] | null>> => {
+  getAll: async (id: string): Promise<ServiceResponse<Post[] | null>> => {
     try {
-      const posts = await postRepository.find();
+      const posts = await postRepository.findAll(id);
       if (!posts?.length) {
         return new ServiceResponse(ResponseStatus.Failed, 'posts not found', null, StatusCodes.NOT_FOUND);
       }

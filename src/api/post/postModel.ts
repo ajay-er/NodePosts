@@ -2,6 +2,8 @@ import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import mongoose, { Schema } from 'mongoose';
 import { z } from 'zod';
 
+import { commonValidations } from '@/common/utils/commonValidation';
+
 extendZodWithOpenApi(z);
 
 export const PostSchema = z.object({
@@ -48,3 +50,7 @@ export type CountResponse = {
 
 export const PostModel = mongoose.model('Post', postMongooseSchema);
 export type Post = z.infer<typeof PostSchema>;
+
+export const PostParamsSchema = z.object({
+  params: z.object({ id: commonValidations.id }),
+});
