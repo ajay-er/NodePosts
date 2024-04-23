@@ -6,7 +6,7 @@ import configurePassport from '@/common/middleware/passport';
 import { handleServiceResponse, validateRequest } from '@/common/utils/httpHandlers';
 
 import { User } from '../user/userModel';
-import { Post, PostParamsSchema } from './postModel';
+import { Post, PostBodySchema, PostParamsSchema } from './postModel';
 
 export const postRouter: Router = (() => {
   const router = express.Router();
@@ -21,26 +21,32 @@ export const postRouter: Router = (() => {
   });
 
   router.get('/:id', validateRequest(PostParamsSchema), async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id as string, 10);
-    const serviceResponse = await postService.getById(id);
+    const id = req.params.id;
+    const user = req?.user as User;
+    const serviceResponse = await postService.getById(id, user.id);
     handleServiceResponse(serviceResponse, res);
   });
 
-  router.post('/', async (req: Request, res: Response) => {
-    const post = req.body;
+  router.post('/', validateRequest(PostBodySchema), async (req: Request, res: Response) => {
+    const post = req.body as Post;
+    const user = req?.user as User;
+    post.createdBy = user.id;
     const serviceResponse = await postService.create(post);
     handleServiceResponse(serviceResponse, res);
   });
 
   router.put('/:id', validateRequest(PostParamsSchema), async (req: Request, res: Response) => {
     const body = req.body as Post;
-    const serviceResponse = await postService.update(body);
+    body.id = req.params.id;
+    const user = req.user as User;
+    const serviceResponse = await postService.update(body, user.id);
     handleServiceResponse(serviceResponse, res);
   });
 
   router.delete('/:id', validateRequest(PostParamsSchema), async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id as string, 10);
-    const serviceResponse = await postService.delete(id);
+    const id = req.params.id;
+    const user = req?.user as User;
+    const serviceResponse = await postService.delete(id, user.id);
     handleServiceResponse(serviceResponse, res);
   });
 

@@ -1,9 +1,8 @@
+import mongoose from 'mongoose';
 import { z } from 'zod';
 
 export const commonValidations = {
-  id: z
-    .string()
-    .refine((data) => !isNaN(Number(data)), 'ID must be a numeric value')
-    .transform(Number)
-    .refine((num) => num > 0, 'ID must be a positive number'),
+  id: z.string().refine((val) => {
+    return mongoose.Types.ObjectId.isValid(val);
+  }),
 };
