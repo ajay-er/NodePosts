@@ -16,27 +16,27 @@ export const userRouter: Router = (() => {
   const router = express.Router();
 
   userRegistry.registerPath({
-    method: 'get',
+    method: 'post',
     path: '/api/v1/users/register',
     tags: ['User'],
     responses: createApiResponse(z.array(UserSchema), 'Success'),
   });
 
-  router.get('/register', async (req: Request, res: Response) => {
-    const { user } = req.body;
-    const serviceResponse = await userService.register(user as User);
+  router.post('/register', async (req: Request, res: Response) => {
+    const user = req.body as User;
+    const serviceResponse = await userService.register(user);
     handleServiceResponse(serviceResponse, res);
   });
 
   userRegistry.registerPath({
-    method: 'get',
+    method: 'post',
     path: '/api/v1/users/login',
     tags: ['User'],
     responses: createApiResponse(UserSchema, 'Success'),
   });
 
-  router.get('/login', async (req: Request, res: Response) => {
-    const { user } = req.body;
+  router.post('/login', async (req: Request, res: Response) => {
+    const user = req.body as User;
     const serviceResponse = await userService.login(user);
     handleServiceResponse(serviceResponse, res);
   });
