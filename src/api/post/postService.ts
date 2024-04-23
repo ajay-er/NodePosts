@@ -72,13 +72,13 @@ export const postService = {
       return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   },
-  getPostByLocation: async (latitude: number, longitude: number): Promise<ServiceResponse<Post | null>> => {
+  getPostByLocation: async (latitude: number, longitude: number): Promise<ServiceResponse<Post[] | null>> => {
     try {
-      const post = await postRepository.findByLocation(latitude, longitude);
-      if (!post) {
+      const posts = await postRepository.findByLocation(latitude, longitude);
+      if (!posts) {
         return new ServiceResponse(ResponseStatus.Failed, 'post deletion failed', null, StatusCodes.NOT_FOUND);
       }
-      return new ServiceResponse<Post>(ResponseStatus.Success, 'post deleted', post, StatusCodes.OK);
+      return new ServiceResponse<Post[]>(ResponseStatus.Success, 'post deleted', posts, StatusCodes.OK);
     } catch (ex) {
       const errorMessage = `Error finding posts: $${(ex as Error).message}`;
       logger.error(errorMessage);
@@ -89,7 +89,12 @@ export const postService = {
     try {
       const posts = await postRepository.findByLocation(latitude, longitude);
       if (!posts?.length) {
-        return new ServiceResponse(ResponseStatus.Failed, 'posts not found', null, StatusCodes.NOT_FOUND);
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          'posts not found! change location',
+          null,
+          StatusCodes.NOT_FOUND
+        );
       }
       return new ServiceResponse<Post[]>(ResponseStatus.Success, 'Posts found', posts, StatusCodes.OK);
     } catch (ex) {
