@@ -7,13 +7,27 @@ import { logger } from '@/server';
 import { User } from './userModel';
 
 export const userService = {
-  register: async (): Promise<ServiceResponse<User | null>> => {
+  register: async (registerData: User): Promise<ServiceResponse<User | null>> => {
     try {
-      const user = await userRepository.register();
-      if (!user) {
-        return new ServiceResponse(ResponseStatus.Failed, 'Oops', null, StatusCodes.NOT_FOUND);
+      const userExist = await userRepository.find(registerData.email);
+      if (userExist) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          'User registration failed - User with the same email already exists',
+          null,
+          StatusCodes.CONFLICT
+        );
       }
-      return new ServiceResponse<User>(ResponseStatus.Success, 'User Registeration complted', user, StatusCodes.OK);
+      const user = await userRepository.create(registerData);
+      if (!user) {
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          'Oops user registeration failed',
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      }
+      return new ServiceResponse<User>(ResponseStatus.Success, 'User Registeration completed', user, StatusCodes.OK);
     } catch (ex) {
       const errorMessage = `Error registering user: $${(ex as Error).message}`;
       logger.error(errorMessage);
@@ -21,9 +35,9 @@ export const userService = {
     }
   },
 
-  login: async (): Promise<ServiceResponse<User | null>> => {
+  login: async (userData: Omit<User, 'name'>): Promise<ServiceResponse<User | null>> => {
     try {
-      const user = await userRepository.login();
+      const user = await userRepository.find(userData?.email);
       if (!user) {
         return new ServiceResponse(ResponseStatus.Failed, 'User not found', null, StatusCodes.NOT_FOUND);
       }
