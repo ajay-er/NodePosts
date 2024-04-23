@@ -20,9 +20,9 @@ export const postService = {
       return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   },
-  getById: async (id: number): Promise<ServiceResponse<Post | null>> => {
+  getById: async (id: string, userId: string): Promise<ServiceResponse<Post | null>> => {
     try {
-      const post = await postRepository.findById(id);
+      const post = await postRepository.findById(id, userId);
       if (!post) {
         return new ServiceResponse(ResponseStatus.Failed, 'post not found', null, StatusCodes.NOT_FOUND);
       }
@@ -46,9 +46,9 @@ export const postService = {
       return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   },
-  update: async (body: Post): Promise<ServiceResponse<Post | null>> => {
+  update: async (body: Post, userId: string): Promise<ServiceResponse<Post | null>> => {
     try {
-      const post = await postRepository.update(body);
+      const post = await postRepository.update(body, userId);
       if (!post) {
         return new ServiceResponse(ResponseStatus.Failed, 'post updation failed', null, StatusCodes.NOT_FOUND);
       }
@@ -59,9 +59,9 @@ export const postService = {
       return new ServiceResponse(ResponseStatus.Failed, errorMessage, null, StatusCodes.INTERNAL_SERVER_ERROR);
     }
   },
-  delete: async (id: number): Promise<ServiceResponse<Post | null>> => {
+  delete: async (id: string, userId: string): Promise<ServiceResponse<Post | null>> => {
     try {
-      const post = await postRepository.delete(id);
+      const post = await postRepository.delete(id, userId);
       if (!post) {
         return new ServiceResponse(ResponseStatus.Failed, 'post deletion failed', null, StatusCodes.NOT_FOUND);
       }

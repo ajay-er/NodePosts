@@ -4,19 +4,17 @@ export const postRepository = {
   findAll: async (id: string): Promise<Post[] | null> => {
     return await PostModel.find({ createdBy: id });
   },
-  findById: async (id: number): Promise<Post | null> => {
-    return await PostModel.findById(id);
+  findById: async (id: string, userId: string): Promise<Post | null> => {
+    return await PostModel.findOne({ _id: id, createdBy: userId });
   },
   create: async (body: Post): Promise<any | null> => {
-    const post = new PostModel(body);
-    const savedPost = await post.save();
-    return savedPost;
+    return await PostModel.create(body);
   },
-  delete: async (id: number): Promise<any | null> => {
-    return await PostModel.findOneAndDelete({ _id: id });
+  update: async (body: Post, userId: string): Promise<any | null> => {
+    return await PostModel.updateOne({ _id: body.id, createdBy: userId }, { $set: body });
   },
-  update: async (body: Post): Promise<any | null> => {
-    return await PostModel.findByIdAndUpdate({ _id: body.id }, body);
+  delete: async (id: string, userId: string): Promise<any | null> => {
+    return await PostModel.deleteOne({ _id: id, createdBy: userId });
   },
   findByLocation: async (lat: number, lon: number): Promise<any | null> => {
     return await PostModel.find({

@@ -7,17 +7,19 @@ import { commonValidations } from '@/common/utils/commonValidation';
 extendZodWithOpenApi(z);
 
 export const PostSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  body: z.string(),
-  createdBy: z.string(),
-  active: z.boolean(),
+  id: z.string().min(1, 'ID must be a positive number'),
+  title: z
+    .string({ invalid_type_error: 'invalid title type', required_error: 'title is required' })
+    .min(1, 'Title must not be empty'),
+  body: z
+    .string({ invalid_type_error: 'invalid body type', required_error: 'body is required' })
+    .min(1, 'Body must not be empty'),
+  createdBy: z.string().optional(),
+  active: z.boolean().default(true).optional(),
   location: z.object({
     type: z.enum(['Point']),
     coordinates: z.tuple([z.number(), z.number()]),
   }),
-  createdAt: z.date(),
-  updatedAt: z.date(),
 });
 
 const postMongooseSchema = new Schema(
@@ -37,8 +39,6 @@ const postMongooseSchema = new Schema(
         required: true,
       },
     },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );
@@ -53,4 +53,8 @@ export type Post = z.infer<typeof PostSchema>;
 
 export const PostParamsSchema = z.object({
   params: z.object({ id: commonValidations.id }),
+});
+
+export const PostBodySchema = z.object({
+  body: PostSchema.omit({ id: true }),
 });
