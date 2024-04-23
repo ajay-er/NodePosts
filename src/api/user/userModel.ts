@@ -13,7 +13,6 @@ export const UserSchema = z.object({
 });
 
 const userMongooseSchema = new mongoose.Schema({
-  id: { type: Number, required: true },
   name: { type: String, required: true },
   email: { type: String, required: true },
   createdAt: { type: Date, required: true },
