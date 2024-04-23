@@ -32,6 +32,9 @@ importers:
       http-status-codes:
         specifier: ^2.3.0
         version: 2.3.0
+      pino:
+        specifier: ^8.20.0
+        version: 8.20.0
       pino-http:
         specifier: ^9.0.0
         version: 9.0.0
