@@ -11,9 +11,6 @@ import { Post, PostBodySchema, PostParamsSchema, PostQuerySchema } from './postM
 export const postRouter: Router = (() => {
   const router = express.Router();
 
-  configurePassport(passport);
-  router.use(passport.authenticate('jwt', { session: false }));
-
   router.get('/location', validateRequest(PostQuerySchema), async (req: Request, res: Response) => {
     const { latitude, longitude } = req.query;
     const lat = parseFloat(latitude as string);
@@ -21,6 +18,14 @@ export const postRouter: Router = (() => {
     const serviceResponse = await postService.getPostByLocation(lat, lon);
     handleServiceResponse(serviceResponse, res);
   });
+
+  router.get('/status-metrics', async (_req: Request, res: Response) => {
+    const serviceResponse = await postService.getCount();
+    handleServiceResponse(serviceResponse, res);
+  });
+
+  configurePassport(passport);
+  router.use(passport.authenticate('jwt', { session: false }));
 
   router.get('/', async (req: Request, res: Response) => {
     const user = req?.user as User;
@@ -60,11 +65,6 @@ export const postRouter: Router = (() => {
     const id = req.params.id;
     const user = req?.user as User;
     const serviceResponse = await postService.delete(id, user.id);
-    handleServiceResponse(serviceResponse, res);
-  });
-
-  router.get('/status-metrics', async (req: Request, res: Response) => {
-    const serviceResponse = await postService.getCount();
     handleServiceResponse(serviceResponse, res);
   });
 
