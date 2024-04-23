@@ -6,7 +6,7 @@ import { userService } from '@/api/user/userService';
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilders';
 import { handleServiceResponse } from '@/common/utils/httpHandlers';
 
-import { UserSchema } from './userModel';
+import { User, UserSchema } from './userModel';
 
 export const userRegistry = new OpenAPIRegistry();
 
@@ -22,8 +22,9 @@ export const userRouter: Router = (() => {
     responses: createApiResponse(z.array(UserSchema), 'Success'),
   });
 
-  router.get('/register', async (_req: Request, res: Response) => {
-    const serviceResponse = await userService.register();
+  router.get('/register', async (req: Request, res: Response) => {
+    const { user } = req.body;
+    const serviceResponse = await userService.register(user as User);
     handleServiceResponse(serviceResponse, res);
   });
 
@@ -35,7 +36,8 @@ export const userRouter: Router = (() => {
   });
 
   router.get('/login', async (req: Request, res: Response) => {
-    const serviceResponse = await userService.login();
+    const { user } = req.body;
+    const serviceResponse = await userService.login(user);
     handleServiceResponse(serviceResponse, res);
   });
 
