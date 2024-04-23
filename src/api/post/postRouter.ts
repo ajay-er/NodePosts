@@ -1,19 +1,26 @@
 import express, { Request, Response, Router } from 'express';
+import passport from 'passport';
 
 import { postService } from '@/api/post/postService';
-import { handleServiceResponse } from '@/common/utils/httpHandlers';
+import configurePassport from '@/common/middleware/passport';
+import { handleServiceResponse, validateRequest } from '@/common/utils/httpHandlers';
 
-import { Post } from './postModel';
+import { User } from '../user/userModel';
+import { Post, PostParamsSchema } from './postModel';
 
 export const postRouter: Router = (() => {
   const router = express.Router();
 
+  configurePassport(passport);
+  router.use(passport.authenticate('jwt', { session: false }));
+
   router.get('/', async (req: Request, res: Response) => {
-    const serviceResponse = await postService.getAll();
+    const user = req?.user as User;
+    const serviceResponse = await postService.getAll(user.id);
     handleServiceResponse(serviceResponse, res);
   });
 
-  router.get('/:id', async (req: Request, res: Response) => {
+  router.get('/:id', validateRequest(PostParamsSchema), async (req: Request, res: Response) => {
     const id = parseInt(req.params.id as string, 10);
     const serviceResponse = await postService.getById(id);
     handleServiceResponse(serviceResponse, res);
@@ -25,13 +32,13 @@ export const postRouter: Router = (() => {
     handleServiceResponse(serviceResponse, res);
   });
 
-  router.put('/:id', async (req: Request, res: Response) => {
+  router.put('/:id', validateRequest(PostParamsSchema), async (req: Request, res: Response) => {
     const body = req.body as Post;
     const serviceResponse = await postService.update(body);
     handleServiceResponse(serviceResponse, res);
   });
 
-  router.delete('/:id', async (req: Request, res: Response) => {
+  router.delete('/:id', validateRequest(PostParamsSchema), async (req: Request, res: Response) => {
     const id = parseInt(req.params.id as string, 10);
     const serviceResponse = await postService.delete(id);
     handleServiceResponse(serviceResponse, res);
