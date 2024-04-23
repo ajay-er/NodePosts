@@ -8,7 +8,7 @@ export const UserSchema = z.object({
   name: z.string().trim().min(3, { message: 'name must be at least 3 characters long' }),
   email: z.string().trim().email({ message: 'Invalid email format' }),
   password: z.string().min(4, { message: 'Password must be at least 4 characters long' }),
-  id: z.string().optional(),
+  id: z.string(),
 });
 
 const userMongooseSchema = new mongoose.Schema(
@@ -25,5 +25,5 @@ export type User = z.infer<typeof UserSchema>;
 
 export const UserLoginSchema = z.object({ body: UserSchema.omit({ name: true, id: true }) });
 export const UserRegisterSchema = z.object({
-  body: UserSchema,
+  body: UserSchema.omit({ id: true }),
 });

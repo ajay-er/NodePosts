@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express, { Express } from 'express';
 import helmet from 'helmet';
+import passport from 'passport';
 import { pino } from 'pino';
 
 import { openAPIRouter } from '@/api-docs/openAPIRouter';
@@ -23,13 +24,14 @@ app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(helmet());
 app.use(rateLimiter);
+app.use(passport.initialize());
 
 // Request logging
 app.use(requestLogger);
 
 // Routes
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/post', postRouter);
+app.use('/api/v1/posts', postRouter);
 
 // Swagger UI
 app.use(openAPIRouter);
