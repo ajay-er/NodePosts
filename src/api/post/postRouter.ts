@@ -6,13 +6,21 @@ import configurePassport from '@/common/middleware/passport';
 import { handleServiceResponse, validateRequest } from '@/common/utils/httpHandlers';
 
 import { User } from '../user/userModel';
-import { Post, PostBodySchema, PostParamsSchema } from './postModel';
+import { Post, PostBodySchema, PostParamsSchema, PostQuerySchema } from './postModel';
 
 export const postRouter: Router = (() => {
   const router = express.Router();
 
   configurePassport(passport);
   router.use(passport.authenticate('jwt', { session: false }));
+
+  router.get('/location', validateRequest(PostQuerySchema), async (req: Request, res: Response) => {
+    const { latitude, longitude } = req.query;
+    const lat = parseFloat(latitude as string);
+    const lon = parseFloat(longitude as string);
+    const serviceResponse = await postService.getPostByLocation(lat, lon);
+    handleServiceResponse(serviceResponse, res);
+  });
 
   router.get('/', async (req: Request, res: Response) => {
     const user = req?.user as User;
@@ -27,13 +35,18 @@ export const postRouter: Router = (() => {
     handleServiceResponse(serviceResponse, res);
   });
 
-  router.post('/', validateRequest(PostBodySchema), async (req: Request, res: Response) => {
-    const post = req.body as Post;
-    const user = req?.user as User;
-    post.createdBy = user.id;
-    const serviceResponse = await postService.create(post);
-    handleServiceResponse(serviceResponse, res);
-  });
+  router.post(
+    '/',
+    passport.authenticate('jwt', { session: false }),
+    validateRequest(PostBodySchema),
+    async (req: Request, res: Response) => {
+      const post = req.body as Post;
+      const user = req?.user as User;
+      post.createdBy = user.id;
+      const serviceResponse = await postService.create(post);
+      handleServiceResponse(serviceResponse, res);
+    }
+  );
 
   router.put('/:id', validateRequest(PostParamsSchema), async (req: Request, res: Response) => {
     const body = req.body as Post;
@@ -47,14 +60,6 @@ export const postRouter: Router = (() => {
     const id = req.params.id;
     const user = req?.user as User;
     const serviceResponse = await postService.delete(id, user.id);
-    handleServiceResponse(serviceResponse, res);
-  });
-
-  router.get('/location', async (req: Request, res: Response) => {
-    const { latitude, longitude } = req.query;
-    const lat = parseFloat(latitude as string);
-    const lon = parseFloat(longitude as string);
-    const serviceResponse = await postService.getPostByLocation(lat, lon);
     handleServiceResponse(serviceResponse, res);
   });
 

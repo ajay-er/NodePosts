@@ -48,11 +48,16 @@ export type CountResponse = {
   inactive: number;
 };
 
+postMongooseSchema.index({ location: '2dsphere' });
 export const PostModel = mongoose.model('Post', postMongooseSchema);
 export type Post = z.infer<typeof PostSchema>;
 
 export const PostParamsSchema = z.object({
   params: z.object({ id: commonValidations.id }),
+});
+
+export const PostQuerySchema = z.object({
+  query: z.object({ longitude: commonValidations.num, latitude: commonValidations.num }),
 });
 
 export const PostBodySchema = z.object({

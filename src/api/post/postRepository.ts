@@ -16,13 +16,13 @@ export const postRepository = {
   delete: async (id: string, userId: string): Promise<any | null> => {
     return await PostModel.deleteOne({ _id: id, createdBy: userId });
   },
-  findByLocation: async (lat: number, lon: number): Promise<any | null> => {
+  findByLocation: async (lat: number, lon: number): Promise<Post[] | null> => {
     return await PostModel.find({
       location: {
         $near: {
           $geometry: {
             type: 'Point',
-            coordinates: [lon, lat],
+            coordinates: [lat, lon],
           },
           $maxDistance: 1000,
         },
