@@ -41,5 +41,10 @@ const postMongooseSchema = new Schema(
   { timestamps: true }
 );
 
+export type CountResponse = {
+  active: number;
+  inactive: number;
+};
+
 export const PostModel = mongoose.model('Post', postMongooseSchema);
 export type Post = z.infer<typeof PostSchema>;

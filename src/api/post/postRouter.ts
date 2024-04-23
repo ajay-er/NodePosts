@@ -37,5 +37,18 @@ export const postRouter: Router = (() => {
     handleServiceResponse(serviceResponse, res);
   });
 
+  router.get('/location', async (req: Request, res: Response) => {
+    const { latitude, longitude } = req.query;
+    const lat = parseFloat(latitude as string);
+    const lon = parseFloat(longitude as string);
+    const serviceResponse = await postService.getPostByLocation(lat, lon);
+    handleServiceResponse(serviceResponse, res);
+  });
+
+  router.get('/status-metrics', async (req: Request, res: Response) => {
+    const serviceResponse = await postService.getCount();
+    handleServiceResponse(serviceResponse, res);
+  });
+
   return router;
 })();
