@@ -1,13 +1,15 @@
+import * as argon2 from 'argon2';
 import { StatusCodes } from 'http-status-codes';
 
 import { userRepository } from '@/api/user/userRepository';
 import { ResponseStatus, ServiceResponse } from '@/common/models/serviceResponse';
+import { generateToken } from '@/common/utils/jwt';
 import { logger } from '@/server';
 
 import { User } from './userModel';
 
 export const userService = {
-  register: async (registerData: User): Promise<ServiceResponse<User | null>> => {
+  register: async (registerData: User): Promise<ServiceResponse<{ user: User; token: string } | null>> => {
     try {
       const userExist = await userRepository.find(registerData.email);
       if (userExist) {
@@ -18,7 +20,8 @@ export const userService = {
           StatusCodes.CONFLICT
         );
       }
-      const user = await userRepository.create(registerData);
+      const hash = await argon2.hash(registerData.password);
+      const user = await userRepository.create({ ...registerData, password: hash });
       if (!user) {
         return new ServiceResponse(
           ResponseStatus.Failed,
@@ -27,7 +30,13 @@ export const userService = {
           StatusCodes.NOT_FOUND
         );
       }
-      return new ServiceResponse<User>(ResponseStatus.Success, 'User Registeration completed', user, StatusCodes.OK);
+      const token = generateToken({ id: user.id, name: user.name });
+      return new ServiceResponse<{ user: User; token: string }>(
+        ResponseStatus.Success,
+        'User Registeration completed',
+        { user, token },
+        StatusCodes.OK
+      );
     } catch (ex) {
       const errorMessage = `Error registering user: $${(ex as Error).message}`;
       logger.error(errorMessage);
@@ -35,13 +44,32 @@ export const userService = {
     }
   },
 
-  login: async (userData: Omit<User, 'name'>): Promise<ServiceResponse<User | null>> => {
+  login: async (userData: Omit<User, 'name'>): Promise<ServiceResponse<{ user: User; token: string } | null>> => {
     try {
       const user = await userRepository.find(userData?.email);
       if (!user) {
-        return new ServiceResponse(ResponseStatus.Failed, 'User not found', null, StatusCodes.NOT_FOUND);
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          'Please enter valid credentials',
+          null,
+          StatusCodes.BAD_REQUEST
+        );
       }
-      return new ServiceResponse<User>(ResponseStatus.Success, 'User found', user, StatusCodes.OK);
+      const isValid = await argon2.verify(user.password, userData.password);
+      if (!isValid)
+        return new ServiceResponse(
+          ResponseStatus.Failed,
+          'Please enter valid credentials',
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      const token = generateToken({ id: user.id, name: user.name });
+      return new ServiceResponse<{ user: User; token: string }>(
+        ResponseStatus.Success,
+        'User found',
+        { user, token },
+        StatusCodes.OK
+      );
     } catch (ex) {
       const errorMessage = `Error login:, ${(ex as Error).message}`;
       logger.error(errorMessage);

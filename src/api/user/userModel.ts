@@ -8,6 +8,7 @@ export const UserSchema = z.object({
   name: z.string(),
   email: z.string().email(),
   password: z.string(),
+  id: z.string().optional(),
 });
 
 const userMongooseSchema = new mongoose.Schema(
