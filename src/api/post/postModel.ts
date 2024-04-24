@@ -57,7 +57,7 @@ export const PostParamsSchema = z.object({
 });
 
 export const PostQuerySchema = z.object({
-  query: z.object({ longitude: commonValidations.num, latitude: commonValidations.num }),
+  query: z.object({ latitude: commonValidations.num, longitude: commonValidations.num }),
 });
 
 export const PostBodySchema = z.object({
